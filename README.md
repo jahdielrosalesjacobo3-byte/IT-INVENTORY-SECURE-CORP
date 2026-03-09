@@ -10,7 +10,7 @@ Este proyecto forma parte de **IT-INVENTORI_2**, una aplicación Node.js/Express
 1. Abre una terminal y ve a la carpeta raíz del proyecto:
 
    ```bash
-   cd "/home/scorpio/Documentos/SECURE_PROYECTS/IT-INVENTORI-_V2/IT-INVENTORI_2"
+   cd "Documentos/SECURE_PROYECTS/IT-INVENTORI-_V2/IT-INVENTORI_2"
    ```
 
 2. (Solo la primera vez) instala las dependencias:
