@@ -1,0 +1,294 @@
+/* SECURE CORP — Tema minimalista negro y azul */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --sc-black: #0f172a;
+  --sc-navy: #1e293b;
+  --sc-slate: #334155;
+  --sc-blue: #2563eb;
+  --sc-blue-light: #3b82f6;
+  --sc-blue-bg: #eff6ff;
+  --sc-bg: #f8fafc;
+  --sc-card: #ffffff;
+  --sc-border: #e2e8f0;
+  --sc-text: #334155;
+  --sc-muted: #64748b;
+  --sc-success: #059669;
+  --sc-danger: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--sc-bg);
+  color: var(--sc-text);
+  min-height: 100vh;
+}
+
+/* Navbar SECURE CORP */
+.sc-nav {
+  background: var(--sc-black) !important;
+  border-bottom: 2px solid var(--sc-blue);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sc-nav .navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff !important;
+  font-size: 1.1rem;
+}
+
+.sc-nav .navbar-brand span {
+  color: var(--sc-blue-light);
+}
+
+.sc-nav .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.sc-nav .nav-link:hover {
+  color: #fff !important;
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.sc-nav .navbar-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.9rem;
+}
+
+.sc-nav .btn-outline-light {
+  border-color: var(--sc-blue-light);
+  color: var(--sc-blue-light);
+  font-weight: 500;
+}
+
+.sc-nav .btn-outline-light:hover {
+  background: var(--sc-blue);
+  border-color: var(--sc-blue);
+  color: #fff;
+}
+
+/* Cards */
+.sc-card {
+  background: var(--sc-card);
+  border: 1px solid var(--sc-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.sc-card:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  border-color: #cbd5e1;
+}
+
+.sc-card .card-title {
+  color: var(--sc-black);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Buttons */
+.sc-btn-primary {
+  background: var(--sc-blue);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.sc-btn-primary:hover {
+  background: #1d4ed8;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.sc-btn-outline {
+  background: transparent;
+  border: 1px solid var(--sc-border);
+  color: var(--sc-slate);
+  font-weight: 500;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.sc-btn-outline:hover {
+  border-color: var(--sc-blue);
+  color: var(--sc-blue);
+}
+
+/* Forms */
+.sc-input,
+.sc-input:focus,
+.form-control.sc-input,
+.form-select.sc-input {
+  border: 1px solid var(--sc-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  color: var(--sc-black);
+}
+
+.form-control.sc-input:focus,
+.form-select.sc-input:focus {
+  border-color: var(--sc-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-label {
+  color: var(--sc-slate);
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+}
+
+/* Alerts */
+.alert-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+  border-radius: 8px;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+  border-radius: 8px;
+}
+
+/* Progress */
+.progress {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--sc-border);
+}
+
+.progress-bar {
+  border-radius: 4px;
+  background: var(--sc-blue) !important;
+}
+
+/* Tables */
+.sc-table {
+  color: var(--sc-text);
+}
+
+.sc-table thead th {
+  color: var(--sc-slate);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--sc-border);
+  padding: 0.75rem;
+}
+
+.sc-table tbody td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.sc-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Badges */
+.badge.bg-secondary {
+  background: var(--sc-slate) !important;
+  font-weight: 500;
+}
+
+.badge.bg-primary {
+  background: var(--sc-blue) !important;
+}
+
+.badge.bg-success {
+  background: var(--sc-success) !important;
+}
+
+/* Page titles */
+.sc-page-title {
+  color: var(--sc-black);
+  font-weight: 700;
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.sc-page-subtitle {
+  color: var(--sc-muted);
+  font-size: 0.9rem;
+}
+
+/* Login / auth */
+.sc-auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.sc-auth-card {
+  background: var(--sc-card);
+  border: 1px solid var(--sc-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.sc-auth-logo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  color: var(--sc-black);
+}
+
+.sc-auth-logo span {
+  color: var(--sc-blue);
+}
+
+.sc-auth-title {
+  font-weight: 600;
+  color: var(--sc-black);
+  margin-bottom: 0.5rem;
+}
+
+.sc-auth-subtitle {
+  color: var(--sc-muted);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Footer brand */
+.sc-footer-brand {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--sc-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--sc-border);
+  margin-top: 3rem;
+}
+
+.sc-footer-brand strong {
+  color: var(--sc-slate);
+}
+
+.sc-footer-brand strong span {
+  color: var(--sc-blue);
+}
