@@ -1,8 +1,44 @@
 # IT-INVENTORY-SECURE-CORP
-
 # Plantillas Word para documentos
 
 Coloca aquí tus archivos **.docx** (por ejemplo `FormatoComputo.docx`).
+
+## Cómo ejecutar el proyecto
+
+Este proyecto forma parte de **IT-INVENTORI_2**, una aplicación Node.js/Express.
+
+1. Abre una terminal y ve a la carpeta raíz del proyecto:
+
+   ```bash
+   cd "/home/scorpio/Documentos/SECURE_PROYECTS/IT-INVENTORI-_V2/IT-INVENTORI_2"
+   ```
+
+2. (Solo la primera vez) instala las dependencias:
+
+   ```bash
+   npm install
+   ```
+
+3. Crea un archivo `.env` en la raíz del proyecto (si no existe) con al menos:
+
+   ```bash
+   PORT=3000
+   SESSION_SECRET=alguna_clave_segura
+   ```
+
+   Ajusta el puerto y los datos de base de datos según tu entorno.
+
+4. Ejecuta el servidor en modo desarrollo:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Abre tu navegador en:
+
+   ```text
+   http://localhost:3000
+   ```
 
 ## Cómo rellenar automáticamente
 
