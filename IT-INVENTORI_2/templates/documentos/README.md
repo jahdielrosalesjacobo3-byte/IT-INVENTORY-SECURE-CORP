@@ -92,8 +92,9 @@ Si quieres mostrar algo solo cuando hay datos:
 
 ## Nombre del archivo
 
-- **FormatoComputo-.docx** → plantilla por defecto para "Formato de cómputo" (botón "Documento" en Personal).
-- Puedes usar otra plantilla con: `/documento/empleado/5?plantilla=OtroFormato.docx`.
+- **FormatoComputo-.docx** → plantilla para documentos de **cómputo** (botón "Cómputo" en Personal).
+- **FormatoCelular-.docx** → plantilla para documentos de **celulares** (botón "Documento" cuando hay celular/SIM). Incluye el campo `{imei}` con el identificador del celular.
+- Puedes usar otra plantilla con: `/documento/empleado/5?plantilla=NombreDelArchivo.docx`.
 
 ## Importante
 

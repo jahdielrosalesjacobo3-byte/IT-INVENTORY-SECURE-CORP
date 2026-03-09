@@ -337,10 +337,10 @@ router.post(
           [marca, modelo, serie, estado || "Nuevo", id]
         );
       } else if (tipo === "celular") {
-        const { marca, modelo, serie } = req.body;
+        const { marca, modelo, serie, imei } = req.body;
         await query(
-          "UPDATE equipos_celular SET marca = ?, modelo = ?, serie = ? WHERE id = ?",
-          [marca, modelo, serie, id]
+          "UPDATE equipos_celular SET marca = ?, modelo = ?, serie = ?, imei = ? WHERE id = ?",
+          [marca, modelo, serie, imei || null, id]
         );
       } else if (tipo === "sim") {
         const { numero_celular, icc, imei } = req.body;
@@ -572,10 +572,10 @@ router.post(
           [marca, modelo, serie, estado || "Nuevo"]
         );
       } else if (tipo === "celular") {
-        const { marca, modelo, serie } = req.body;
+        const { marca, modelo, serie, imei } = req.body;
         await query(
-          "INSERT INTO equipos_celular (marca, modelo, serie) VALUES (?, ?, ?)",
-          [marca, modelo, serie]
+          "INSERT INTO equipos_celular (marca, modelo, serie, imei) VALUES (?, ?, ?, ?)",
+          [marca, modelo, serie, imei || null]
         );
       } else if (tipo === "sim") {
         const { numero_celular, icc, imei } = req.body;
@@ -758,7 +758,6 @@ router.get(
   ensureStaff,
   async (req, res) => {
     const { id } = req.params;
-    const plantilla = req.query.plantilla || "FormatoComputo-.docx";
 
     try {
       const empleados = await query("SELECT * FROM equipos_empleado WHERE id = ?", [id]);
@@ -770,11 +769,17 @@ router.get(
 
       const [computadoras, celulares, simcards] = await Promise.all([
         query(
-          "SELECT marca, modelo, serie, estado FROM equipos_computadora WHERE asignado_a_id = ?",
+          "SELECT marca, modelo, serie, estado, fecha_asignacion FROM equipos_computadora WHERE asignado_a_id = ?",
           [id]
         ),
-        query("SELECT marca, modelo, serie FROM equipos_celular WHERE asignado_a_id = ?", [id]),
-        query("SELECT numero_celular, icc, imei FROM equipos_simcard WHERE asignado_a_id = ?", [id])
+        query(
+          "SELECT marca, modelo, serie, imei, fecha_asignacion FROM equipos_celular WHERE asignado_a_id = ?",
+          [id]
+        ),
+        query(
+          "SELECT numero_celular, icc, imei, fecha_asignacion FROM equipos_simcard WHERE asignado_a_id = ?",
+          [id]
+        )
       ]);
 
       const fecha = new Date().toLocaleDateString("es-MX", {
@@ -785,11 +790,32 @@ router.get(
 
       const nombreCompleto = `${empleado.nombre} ${empleado.apellidos}`.trim();
       const primeraComputadora = computadoras[0] || {};
+      const primerCelular = celulares[0] || {};
+      const primeraSim = simcards[0] || {};
 
       const estadoNormalizado =
         typeof primeraComputadora.estado === "string"
           ? primeraComputadora.estado.toLowerCase()
           : "";
+
+      const formatearFechaHora = (valor) => {
+        if (!valor) return "";
+        const d = new Date(valor);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toLocaleString("es-MX", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      };
+
+      const fechaAsignacionEquipo = formatearFechaHora(
+        primeraComputadora.fecha_asignacion ||
+          primerCelular.fecha_asignacion ||
+          primeraSim.fecha_asignacion
+      );
 
       const data = {
         nombre: empleado.nombre,
@@ -802,23 +828,42 @@ router.get(
         ticket: empleado.ticket,
         fecha,
         computadoras,
-        celulares,
+        celulares: celulares.map((c) => ({ ...c, imei: c.imei || c.serie })),
         simcards,
-        // Primer equipo (por si el formato solo tiene un bloque)
-        marca: primeraComputadora.marca || "",
-        modelo: primeraComputadora.modelo || celulares[0]?.modelo || "",
-        serie: primeraComputadora.serie || celulares[0]?.serie || "",
-        modelo_serie:
-          primeraComputadora.modelo || primeraComputadora.serie
-            ? `${primeraComputadora.modelo || ""}${
-                primeraComputadora.serie ? ` (${primeraComputadora.serie})` : ""
-              }`
-            : "",
-        estado_equipo: estadoNormalizado || "",
+        // Fecha y hora de asignación del equipo (computadora / celular / SIM).
+        fecha_asignacion: fechaAsignacionEquipo,
+        // Primer equipo (por si el formato solo tiene un bloque).
+        // Si no hay computadora, usa los datos del primer celular.
+        marca: primeraComputadora.marca || primerCelular.marca || "",
+        modelo: primeraComputadora.modelo || primerCelular.modelo || "",
+        serie: primeraComputadora.serie || primerCelular.serie || "",
+        modelo_serie: (() => {
+          const modeloBase = primeraComputadora.modelo || primerCelular.modelo || "";
+          const serieBase = primeraComputadora.serie || primerCelular.serie || "";
+          if (!modeloBase && !serieBase) {
+            return "";
+          }
+          return `${modeloBase}${serieBase ? ` (${serieBase})` : ""}`;
+        })(),
+        // Si no tenemos estado en BD (por ejemplo, solo hay celular), asumimos "nuevo" para no dejar vacío.
+        estado_equipo: estadoNormalizado || "nuevo",
         numero_celular: simcards[0]?.numero_celular || "",
         icc: simcards[0]?.icc || "",
-        imei: simcards[0]?.imei || ""
+        // IMEI: prioridad al celular asignado; si no, SIM; si no, serie del celular como identificador.
+        imei: primerCelular.imei || simcards[0]?.imei || primerCelular.serie || ""
       };
+
+      // Detectar plantilla según el equipo asignado (computadora → cómputo; celular/SIM → celulares).
+      let plantilla = req.query.plantilla;
+      if (!plantilla) {
+        if (computadoras.length) {
+          plantilla = "FormatoComputo-.docx";
+        } else if (celulares.length || simcards.length) {
+          plantilla = "FormatoCelular-.docx";
+        } else {
+          plantilla = "FormatoComputo-.docx";
+        }
+      }
 
       const buffer = generateDocx(plantilla, data);
       const nombreArchivo = `Formato_${empleado.nombre}_${empleado.apellidos}_${id}.docx`.replace(/\s+/g, "_");

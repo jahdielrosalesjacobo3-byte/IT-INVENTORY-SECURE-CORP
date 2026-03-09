@@ -139,7 +139,12 @@ const celularRules = [
     .notEmpty()
     .withMessage("La serie es obligatoria.")
     .isLength({ max: 100 })
-    .withMessage("La serie no puede exceder 100 caracteres.")
+    .withMessage("La serie no puede exceder 100 caracteres."),
+  body("imei")
+    .optional()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage("El IMEI no puede exceder 20 caracteres.")
 ];
 
 // Registrar SIM

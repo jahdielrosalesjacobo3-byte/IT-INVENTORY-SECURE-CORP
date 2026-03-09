@@ -60,6 +60,7 @@ if (DB_TYPE === "sqlite") {
         marca VARCHAR(50) NOT NULL,
         modelo VARCHAR(50) NOT NULL,
         serie VARCHAR(100) NOT NULL UNIQUE,
+        imei VARCHAR(20) NULL,
         fecha_asignacion DATETIME NULL,
         asignado_a_id INTEGER NULL REFERENCES equipos_empleado(id)
       )`,

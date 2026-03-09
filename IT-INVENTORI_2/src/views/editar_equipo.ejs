@@ -57,10 +57,15 @@
                     <input type="text" name="modelo" class="form-control sc-input <%= (fieldErrors && fieldErrors.modelo) ? 'is-invalid' : '' %>" value="<%= (old && old.modelo) != null ? old.modelo : item.modelo %>" required />
                     <% if (fieldErrors && fieldErrors.modelo) { %><div class="invalid-feedback"><%= fieldErrors.modelo[0] %></div><% } %>
                   </div>
-                  <div class="mb-4">
+                  <div class="mb-3">
                     <label class="form-label">Serie</label>
                     <input type="text" name="serie" class="form-control sc-input <%= (fieldErrors && fieldErrors.serie) ? 'is-invalid' : '' %>" value="<%= (old && old.serie) != null ? old.serie : item.serie %>" required />
                     <% if (fieldErrors && fieldErrors.serie) { %><div class="invalid-feedback"><%= fieldErrors.serie[0] %></div><% } %>
+                  </div>
+                  <div class="mb-4">
+                    <label class="form-label">IMEI</label>
+                    <input type="text" name="imei" class="form-control sc-input <%= (fieldErrors && fieldErrors.imei) ? 'is-invalid' : '' %>" value="<%= (old && old.imei) != null ? old.imei : (item.imei || '') %>" placeholder="Identificador del celular (opcional)" />
+                    <% if (fieldErrors && fieldErrors.imei) { %><div class="invalid-feedback"><%= fieldErrors.imei[0] %></div><% } %>
                   </div>
                 <% } else if (tipo === "sim") { %>
                   <div class="mb-3">

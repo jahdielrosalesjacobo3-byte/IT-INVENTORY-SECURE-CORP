@@ -71,7 +71,7 @@
                       <% item.simcards.forEach(function(s) { %><div><span class="badge bg-secondary">Tel: <%= s.numero_celular %> (ICC: <%= s.icc %>)</span></div><% }) %>
                     </td>
                     <td class="text-end">
-                      <a href="/documento/empleado/<%= item.empleado.id %>" class="btn btn-sm btn-success py-1 px-2 text-white text-decoration-none" title="Descargar formato Word">Documento</a>
+                      <a href="/documento/empleado/<%= item.empleado.id %>" class="btn btn-sm btn-success py-1 px-2 text-white text-decoration-none" title="Descargar formato según equipo asignado">Documento</a>
                       <a href="/personal/<%= item.empleado.id %>/editar" class="btn btn-sm sc-btn-outline py-1 px-2">Editar</a>
                       <form action="/personal/<%= item.empleado.id %>/eliminar" method="post" class="d-inline ms-1" onsubmit="return confirm('¿Eliminar este colaborador y liberar sus equipos?');">
                         <button type="submit" class="btn btn-sm btn-danger py-1 px-2">Eliminar</button>
