@@ -80,7 +80,7 @@
                       <select name="sim_id" class="form-select sc-input">
                         <option value="">— Ninguna —</option>
                         <% simcards.forEach(function(s) { %>
-                          <option value="<%= s.id %>" <%= (old && old.sim_id == s.id) ? 'selected' : '' %>>Tel: <%= s.numero_celular %> (ICC: <%= s.icc %>)</option>
+                          <option value="<%= s.id %>" <%= (old && old.sim_id == s.id) ? 'selected' : '' %>><%= (s.tipo === 'ESIM') ? 'eSIM' : 'SIM' %> — Tel: <%= s.numero_celular %> (ICC: <%= s.icc %>)</option>
                         <% }) %>
                       </select>
                     </div>

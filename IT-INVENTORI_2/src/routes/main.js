@@ -17,6 +17,7 @@ const {
   registroAdminRules
 } = require("../validators");
 const { generateDocx, listTemplates } = require("../services/docxGenerator");
+const { generateEsimPdf } = require("../services/pdfGenerator");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -34,7 +35,7 @@ const esimStorage = multer.diskStorage({
     cb(null, esimUploadDir);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || ".png";
+    const ext = path.extname(file.originalname).toLowerCase() || ".png";
     const base = path.basename(file.originalname, ext).replace(/\s+/g, "_");
     cb(null, `${Date.now()}_${base}${ext}`);
   }
@@ -43,12 +44,21 @@ const esimStorage = multer.diskStorage({
 const uploadEsimQr = multer({
   storage: esimStorage,
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Solo se permiten imágenes para el QR de eSIM."));
+    const mime = file.mimetype.toLowerCase();
+    if (mime !== "image/png" && mime !== "image/jpeg" && mime !== "image/jpg") {
+      return cb(new Error("Solo se permiten imágenes PNG o JPG para el QR de eSIM."));
     }
     cb(null, true);
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
   }
 });
+
+function maybeUploadEsimQr(req, res, next) {
+  if (req.params.tipo !== "sim") return next();
+  return uploadEsimQr.single("qr_esim")(req, res, next);
+}
 
 // Redirigir raíz a /home
 router.get("/", ensureAuthenticated, (req, res) => {
@@ -426,7 +436,7 @@ router.get("/asignar", ensureAuthenticated, ensureStaff, async (req, res) => {
         "SELECT id, marca, modelo, serie FROM equipos_celular WHERE asignado_a_id IS NULL ORDER BY marca, modelo"
       ),
       query(
-        "SELECT id, numero_celular, icc, imei FROM equipos_simcard WHERE asignado_a_id IS NULL ORDER BY numero_celular"
+        "SELECT id, numero_celular, icc, imei, tipo FROM equipos_simcard WHERE asignado_a_id IS NULL ORDER BY numero_celular"
       )
     ]);
 
@@ -461,7 +471,7 @@ router.post(
           "SELECT id, marca, modelo, serie FROM equipos_celular WHERE asignado_a_id IS NULL ORDER BY marca, modelo"
         ),
         query(
-          "SELECT id, numero_celular, icc, imei FROM equipos_simcard WHERE asignado_a_id IS NULL ORDER BY numero_celular"
+          "SELECT id, numero_celular, icc, imei, tipo FROM equipos_simcard WHERE asignado_a_id IS NULL ORDER BY numero_celular"
         )
       ]);
       return res.render("asignacion", {
@@ -485,53 +495,53 @@ router.post(
     } = req.body;
 
     try {
-    const empleadoResult = await query(
-      "INSERT INTO equipos_empleado (nombre, apellidos, correo, puesto, ticket) VALUES (?, ?, ?, ?, ?)",
-      [nombre, apellidos, correo, puesto, ticket]
-    );
-
-    const empleadoId = empleadoResult.insertId;
-
-    // Asignar equipos seleccionados
-    const updates = [];
-    if (computadoraId) {
-      updates.push(
-        query(
-          "UPDATE equipos_computadora SET asignado_a_id = ?, fecha_asignacion = NOW(), estado = 'Usado' WHERE id = ?",
-          [empleadoId, computadoraId]
-        )
+      const empleadoResult = await query(
+        "INSERT INTO equipos_empleado (nombre, apellidos, correo, puesto, ticket) VALUES (?, ?, ?, ?, ?)",
+        [nombre, apellidos, correo, puesto, ticket]
       );
-    }
-    if (celularId) {
-      updates.push(
-        query(
-          "UPDATE equipos_celular SET asignado_a_id = ?, fecha_asignacion = NOW() WHERE id = ?",
-          [empleadoId, celularId]
-        )
-      );
-    }
-    if (simId) {
-      updates.push(
-        query(
-          "UPDATE equipos_simcard SET asignado_a_id = ?, fecha_asignacion = NOW() WHERE id = ?",
-          [empleadoId, simId]
-        )
-      );
-    }
 
-    if (updates.length) {
-      await Promise.all(updates);
-    }
+      const empleadoId = empleadoResult.insertId;
 
-    req.flash("success", "Asignación registrada correctamente.");
-    return res.redirect("/home");
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error en POST /asignar:", err);
-    req.flash("error", err.code === "SQLITE_CONSTRAINT_UNIQUE" ? "El correo del colaborador ya está registrado." : "Ocurrió un error al registrar la asignación.");
-    return res.redirect("/asignar");
-  }
-});
+      // Asignar equipos seleccionados
+      const updates = [];
+      if (computadoraId) {
+        updates.push(
+          query(
+            "UPDATE equipos_computadora SET asignado_a_id = ?, fecha_asignacion = NOW(), estado = 'Usado' WHERE id = ?",
+            [empleadoId, computadoraId]
+          )
+        );
+      }
+      if (celularId) {
+        updates.push(
+          query(
+            "UPDATE equipos_celular SET asignado_a_id = ?, fecha_asignacion = NOW() WHERE id = ?",
+            [empleadoId, celularId]
+          )
+        );
+      }
+      if (simId) {
+        updates.push(
+          query(
+            "UPDATE equipos_simcard SET asignado_a_id = ?, fecha_asignacion = NOW() WHERE id = ?",
+            [empleadoId, simId]
+          )
+        );
+      }
+
+      if (updates.length) {
+        await Promise.all(updates);
+      }
+
+      req.flash("success", "Asignación registrada correctamente.");
+      return res.redirect("/home");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Error en POST /asignar:", err);
+      req.flash("error", err.code === "SQLITE_CONSTRAINT_UNIQUE" ? "El correo del colaborador ya está registrado." : "Ocurrió un error al registrar la asignación.");
+      return res.redirect("/asignar");
+    }
+  });
 
 // Registrar equipo (equivalente a registrar_equipo)
 router.get(
@@ -569,7 +579,7 @@ router.post(
   "/registrar/:tipo",
   ensureAuthenticated,
   ensureStaff,
-  uploadEsimQr.single("qr_esim"),
+  maybeUploadEsimQr,
   async (req, res) => {
     const { tipo } = req.params;
     const config = {
@@ -814,7 +824,7 @@ router.get(
           [id]
         ),
         query(
-          "SELECT numero_celular, icc, imei, fecha_asignacion FROM equipos_simcard WHERE asignado_a_id = ?",
+          "SELECT numero_celular, icc, imei, tipo, es_reemplazo, qr_esim, fecha_asignacion FROM equipos_simcard WHERE asignado_a_id = ?",
           [id]
         )
       ]);
@@ -850,9 +860,20 @@ router.get(
 
       const fechaAsignacionEquipo = formatearFechaHora(
         primeraComputadora.fecha_asignacion ||
-          primerCelular.fecha_asignacion ||
-          primeraSim.fecha_asignacion
+        primerCelular.fecha_asignacion ||
+        primeraSim.fecha_asignacion
       );
+
+      const tieneEsim = simcards.some((s) => s.tipo === "ESIM");
+
+      // Ruta absoluta de la imagen de QR (si existe) para PDF.
+      let qrEsimAbs = null;
+      if (primeraSim.qr_esim) {
+        const relQr = primeraSim.qr_esim.startsWith("/")
+          ? primeraSim.qr_esim.slice(1)
+          : primeraSim.qr_esim;
+        qrEsimAbs = path.join(__dirname, "..", "..", "public", relQr);
+      }
 
       const data = {
         nombre: empleado.nombre,
@@ -884,28 +905,46 @@ router.get(
         })(),
         // Si no tenemos estado en BD (por ejemplo, solo hay celular), asumimos "nuevo" para no dejar vacío.
         estado_equipo: estadoNormalizado || "nuevo",
-        // Datos específicos de SIM (si existe): MSISDN, ICC, IMSI y si es reemplazo.
-        numero_celular: simcards[0]?.numero_celular || "",
-        icc: simcards[0]?.icc || "",
-        msisdn: simcards[0]?.numero_celular || "",
-        imsi: simcards[0]?.imei || "",
-        reemplazo_sim: "No",
+        // Datos específicos de SIM/eSIM (si existe): MSISDN, ICC, IMSI, reemplazo y QR.
+        numero_celular: primeraSim.numero_celular || "",
+        icc: primeraSim.icc || "",
+        msisdn: primeraSim.numero_celular || "",
+        imsi: primeraSim.imei || "",
+        reemplazo_sim: primeraSim.es_reemplazo ? "Sí" : "No",
+        qr_esim: primeraSim.qr_esim || "",
+        qr_esim_abs: qrEsimAbs,
         // IMEI: prioridad al celular asignado; si no, SIM; si no, serie del celular como identificador.
         imei: primerCelular.imei || simcards[0]?.imei || primerCelular.serie || ""
       };
 
-      // Detectar plantilla según el equipo asignado:
-      // - Computadora → formato de cómputo
-      // - Celular → formato de celulares
-      // - Solo SIM → formato eSIM
+      // Si hay eSIM, generamos PDF en lugar de Word.
+      if (tieneEsim && !req.query.plantilla) {
+        const pdfBuffer = await generateEsimPdf(data);
+        const nombrePdf = `Formato_ESIM_${empleado.nombre}_${empleado.apellidos}_${id}.pdf`.replace(
+          /\s+/g,
+          "_"
+        );
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${nombrePdf}"`);
+        return res.end(pdfBuffer);
+      }
+
+      // Detectar plantilla Word según el equipo asignado:
+      // - Si no hay eSIM pero hay computadora → formato de cómputo
+      // - Si no hay eSIM ni computadora pero hay celular → formato de celulares
+      // - Si solo hay SIM física → formato eSIM (mismo formato de línea móvil)
       let plantilla = req.query.plantilla;
       if (!plantilla) {
-        if (computadoras.length) {
+        const tieneEsim = simcards.some((s) => s.tipo === "ESIM");
+
+        if (tieneEsim) {
+          plantilla = "Formato_ESIM.docx";
+        } else if (computadoras.length) {
           plantilla = "FormatoComputo-.docx";
         } else if (celulares.length) {
           plantilla = "FormatoCelular-.docx";
         } else if (simcards.length) {
-          plantilla = "FormatoEsim- (1).docx";
+          plantilla = "Formato_ESIM.docx";
         } else {
           plantilla = "FormatoComputo-.docx";
         }
@@ -916,7 +955,7 @@ router.get(
 
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
       res.setHeader("Content-Disposition", `attachment; filename="${nombreArchivo}"`);
-      res.send(buffer);
+      res.end(buffer);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Error generando documento:", err);

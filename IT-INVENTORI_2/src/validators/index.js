@@ -174,15 +174,20 @@ const simRules = [
     .isLength({ max: 20 })
     .withMessage("El IMEI no puede exceder 20 caracteres."),
   body("reemplazo_sim")
-    .optional()
-    .trim()
-    .isIn(["si", "no"])
-    .withMessage("Valor inválido para reemplazo de SIM."),
+    .custom((value) => {
+      if (value !== "si" && value !== "no") {
+        throw new Error("Debes indicar si es reemplazo (sí o no).");
+      }
+      return true;
+    }),
   body("qr_esim")
-    .optional()
-    .trim()
-    .isLength({ max: 255 })
-    .withMessage("El campo de QR no puede exceder 255 caracteres.")
+    .custom((_, { req }) => {
+      if (req.body.tipo_sim !== "ESIM") return true;
+      if (!req.file) {
+        throw new Error("Debes subir la imagen del QR para la eSIM.");
+      }
+      return true;
+    })
 ];
 
 // Registrar admin

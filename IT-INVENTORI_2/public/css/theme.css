@@ -2,19 +2,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --sc-black: #0f172a;
-  --sc-navy: #1e293b;
-  --sc-slate: #334155;
+  --sc-black: #020617;
+  --sc-navy: #0b1120;
+  --sc-slate: #94a3b8;
+  /* Lighter gray for labels and headers */
   --sc-blue: #2563eb;
   --sc-blue-light: #3b82f6;
-  --sc-blue-bg: #eff6ff;
-  --sc-bg: #f8fafc;
-  --sc-card: #ffffff;
-  --sc-border: #e2e8f0;
-  --sc-text: #334155;
-  --sc-muted: #64748b;
-  --sc-success: #059669;
-  --sc-danger: #dc2626;
+  --sc-blue-bg: #0f172a;
+  --sc-bg: radial-gradient(circle at top, #0b1120 0, #020617 60%, #020617 100%);
+  --sc-card: #0b1120;
+  /* Slightly lighter than black for depth */
+  --sc-border: #1e293b;
+  --sc-text: #f8fafc;
+  --sc-muted: #cbd5e1;
+  /* Lighter muted text */
+  --sc-success: #10b981;
+  --sc-danger: #ef4444;
 }
 
 * {
@@ -26,6 +29,7 @@ body {
   background: var(--sc-bg);
   color: var(--sc-text);
   min-height: 100vh;
+  animation: sc-fade-in 0.4s ease-out;
 }
 
 /* Navbar SECURE CORP */
@@ -81,19 +85,29 @@ body {
   background: var(--sc-card);
   border: 1px solid var(--sc-border);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.65);
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
 }
 
 .sc-card:hover {
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
-  border-color: #cbd5e1;
+  box-shadow: 0 26px 65px rgba(15, 23, 42, 0.85);
+  border-color: #2563eb;
+  transform: translateY(-2px);
 }
 
 .sc-card .card-title {
-  color: var(--sc-black);
-  font-weight: 600;
-  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.sc-card .card-text {
+  color: var(--sc-muted);
+}
+
+.sc-card .card-text strong {
+  color: #fff;
 }
 
 /* Buttons */
@@ -114,18 +128,39 @@ body {
 }
 
 .sc-btn-outline {
-  background: transparent;
+  background: rgba(148, 163, 184, 0.05);
   border: 1px solid var(--sc-border);
-  color: var(--sc-slate);
-  font-weight: 500;
+  color: #fff;
+  font-weight: 600;
   padding: 0.6rem 1.25rem;
   border-radius: 8px;
-  transition: border-color 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
 
 .sc-btn-outline:hover {
+  background: rgba(37, 99, 235, 0.1);
   border-color: var(--sc-blue);
-  color: var(--sc-blue);
+  color: var(--sc-blue-light);
+  transform: translateY(-1px);
+}
+
+.sc-btn-edit {
+  background: var(--sc-blue);
+  border: none;
+  color: #fff !important;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.sc-btn-edit:hover {
+  background: var(--sc-blue-light);
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* Forms */
@@ -136,7 +171,17 @@ body {
   border: 1px solid var(--sc-border);
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
-  color: var(--sc-black);
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.sc-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sc-input option {
+  background-color: var(--sc-navy);
+  color: var(--sc-text);
 }
 
 .form-control.sc-input:focus,
@@ -146,10 +191,23 @@ body {
 }
 
 .form-label {
-  color: var(--sc-slate);
-  font-weight: 600;
-  font-size: 0.875rem;
-  margin-bottom: 0.35rem;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.sc-card .text-muted,
+.sc-card .form-text {
+  color: #fff !important;
+  opacity: 0.8;
+}
+
+.sc-card p.text-muted.text-uppercase {
+  color: #fff !important;
+  opacity: 1;
+  letter-spacing: 0.05em;
 }
 
 /* Alerts */
@@ -196,12 +254,16 @@ body {
 
 .sc-table tbody td {
   padding: 0.75rem;
-  border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
 }
 
 .sc-table tbody tr:hover {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sc-table tbody td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--sc-border);
+  vertical-align: middle;
 }
 
 /* Badges */
@@ -220,7 +282,7 @@ body {
 
 /* Page titles */
 .sc-page-title {
-  color: var(--sc-black);
+  color: #fff;
   font-weight: 700;
   font-size: 1.35rem;
   margin-bottom: 0.25rem;
@@ -256,7 +318,7 @@ body {
   font-weight: 800;
   font-size: 1.25rem;
   letter-spacing: 0.08em;
-  color: var(--sc-black);
+  color: var(--sc-text);
 }
 
 .sc-auth-logo span {
@@ -265,7 +327,7 @@ body {
 
 .sc-auth-title {
   font-weight: 600;
-  color: var(--sc-black);
+  color: var(--sc-text);
   margin-bottom: 0.5rem;
 }
 
@@ -282,6 +344,7 @@ body {
   color: var(--sc-muted);
   font-size: 0.8rem;
   border-top: 1px solid var(--sc-border);
+  background: #020617;
   margin-top: 3rem;
 }
 
@@ -291,4 +354,29 @@ body {
 
 .sc-footer-brand strong span {
   color: var(--sc-blue);
+}
+
+/* Logo en navbar/auth */
+.sc-logo {
+  height: 45px;
+  width: auto;
+  margin-right: 0.5rem;
+  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.7));
+}
+
+/* Animaciones generales */
+@keyframes sc-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sc-animate {
+  animation: sc-fade-in 0.45s ease-out;
 }

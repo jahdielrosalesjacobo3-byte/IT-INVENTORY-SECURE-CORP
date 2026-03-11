@@ -20,6 +20,8 @@
     "bcrypt": "^5.1.1",
     "connect-flash": "^0.1.1",
     "docxtemplater": "^3.68.3",
+    "docxtemplater-image-module": "^3.1.0",
+    "docxtemplater-image-module-free": "^1.1.1",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
@@ -27,9 +29,11 @@
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
     "method-override": "^3.0.0",
-    "mysql2": "^3.11.3",
-    "pizzip": "^3.2.0",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.2",
+    "pizzip": "^3.2.0",
     "sql.js": "^1.14.1"
   },
   "devDependencies": {

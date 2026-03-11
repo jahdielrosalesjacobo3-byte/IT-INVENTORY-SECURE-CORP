@@ -50,7 +50,7 @@
                   <div class="mb-3"><label class="form-label">IMSI / Identificador</label><input type="text" name="imei" class="form-control sc-input <%= (fieldErrors && fieldErrors.imei) ? 'is-invalid' : '' %>" value="<%= (old && old.imei) ? old.imei : '' %>" required /><% if (fieldErrors && fieldErrors.imei) { %><div class="invalid-feedback"><%= fieldErrors.imei[0] %></div><% } %></div>
 
                   <div class="mb-3" id="grupo_reemplazo_sim">
-                    <label class="form-label">¿Es reemplazo de SIM?</label>
+                    <label class="form-label">¿Es reemplazo de la línea?</label>
                     <select name="reemplazo_sim" class="form-select sc-input <%= (fieldErrors && fieldErrors.reemplazo_sim) ? 'is-invalid' : '' %>">
                       <option value="no" <%= (!old || old.reemplazo_sim === 'no') ? 'selected' : '' %>>No</option>
                       <option value="si" <%= (old && old.reemplazo_sim === 'si') ? 'selected' : '' %>>Sí</option>
@@ -92,7 +92,7 @@
         function actualizarVisibilidad() {
           if (!selectTipo) return;
           const esEsim = selectTipo.value === "ESIM";
-          if (grupoReemplazo) grupoReemplazo.classList.toggle("d-none", esEsim);
+          // El campo de reemplazo aplica tanto para SIM como para eSIM, siempre visible.
           if (grupoQrEsim) grupoQrEsim.classList.toggle("d-none", !esEsim);
         }
 

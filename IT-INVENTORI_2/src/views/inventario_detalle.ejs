@@ -53,8 +53,19 @@
                       <% } else { %><strong>Tel: <%= obj.numero_celular %></strong><% } %>
                     </td>
                     <td>
-                      <% if (tipo === "computadora" || tipo === "celular") { %><span class="badge bg-secondary">S/N: <%= obj.serie %></span>
-                      <% } else { %><span class="badge bg-secondary">ICC: <%= obj.icc %></span><span class="badge bg-light text-dark border ms-1">IMEI: <%= obj.imei %></span><% } %>
+                      <% if (tipo === "computadora" || tipo === "celular") { %>
+                        <span class="badge bg-secondary">S/N: <%= obj.serie %></span>
+                      <% } else { %>
+                        <span class="badge bg-secondary"><%= (obj.tipo === 'ESIM') ? 'eSIM' : 'SIM' %></span>
+                        <span class="badge bg-secondary ms-1">ICC: <%= obj.icc %></span>
+                        <span class="badge bg-light text-dark border ms-1">IMSI: <%= obj.imei %></span>
+                        <% if (obj.es_reemplazo) { %>
+                          <span class="badge bg-warning text-dark ms-1">Reemplazo</span>
+                        <% } %>
+                        <% if (obj.tipo === 'ESIM' && obj.qr_esim) { %>
+                          <a class="badge bg-info text-white ms-1 text-decoration-none" href="<%= obj.qr_esim %>" target="_blank" rel="noreferrer">Ver QR</a>
+                        <% } %>
+                      <% } %>
                     </td>
                     <td>
                       <% if (!empleado) { %><span class="badge bg-success">Disponible</span>
@@ -63,7 +74,7 @@
                       <% } %>
                     </td>
                     <td class="text-end">
-                      <a href="/inventario/<%= tipo %>/<%= obj.id %>/editar" class="btn btn-sm sc-btn-outline py-1 px-2">Editar</a>
+                      <a href="/inventario/<%= tipo %>/<%= obj.id %>/editar" class="btn btn-sm sc-btn-edit py-1 px-2">Editar</a>
                       <form action="/inventario/<%= tipo %>/<%= obj.id %>/eliminar" method="post" class="d-inline ms-1" onsubmit="return confirm('¿Eliminar este equipo del inventario?');">
                         <button type="submit" class="btn btn-sm btn-danger py-1 px-2">Eliminar</button>
                       </form>

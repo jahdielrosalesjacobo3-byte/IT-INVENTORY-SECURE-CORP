@@ -27,7 +27,7 @@ function generateDocx(templateName, data) {
     throw new Error(`Plantilla no encontrada: ${templateName}. Coloca el archivo en: ${TEMPLATES_DIR}`);
   }
 
-  const content = fs.readFileSync(templatePath, "binary");
+  const content = fs.readFileSync(templatePath);
   const zip = new PizZip(content);
   const doc = new Docxtemplater(zip, {
     paragraphLoop: true,
