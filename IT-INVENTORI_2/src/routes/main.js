@@ -17,8 +17,38 @@ const {
   registroAdminRules
 } = require("../validators");
 const { generateDocx, listTemplates } = require("../services/docxGenerator");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const router = express.Router();
+
+// Configuración de subida de QR de eSIM
+const esimUploadDir = path.join(__dirname, "..", "..", "public", "uploads", "esim");
+if (!fs.existsSync(esimUploadDir)) {
+  fs.mkdirSync(esimUploadDir, { recursive: true });
+}
+
+const esimStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, esimUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".png";
+    const base = path.basename(file.originalname, ext).replace(/\s+/g, "_");
+    cb(null, `${Date.now()}_${base}${ext}`);
+  }
+});
+
+const uploadEsimQr = multer({
+  storage: esimStorage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Solo se permiten imágenes para el QR de eSIM."));
+    }
+    cb(null, true);
+  }
+});
 
 // Redirigir raíz a /home
 router.get("/", ensureAuthenticated, (req, res) => {
@@ -539,6 +569,7 @@ router.post(
   "/registrar/:tipo",
   ensureAuthenticated,
   ensureStaff,
+  uploadEsimQr.single("qr_esim"),
   async (req, res) => {
     const { tipo } = req.params;
     const config = {
@@ -578,10 +609,16 @@ router.post(
           [marca, modelo, serie, imei || null]
         );
       } else if (tipo === "sim") {
-        const { numero_celular, icc, imei } = req.body;
+        const { tipo_sim, numero_celular, icc, imei, reemplazo_sim } = req.body;
+        const tipoLinea = tipo_sim === "ESIM" ? "ESIM" : "SIM";
+        const esReemplazo = reemplazo_sim === "si" ? 1 : 0;
+        const qrPath =
+          tipoLinea === "ESIM" && req.file
+            ? `/uploads/esim/${req.file.filename}`
+            : null;
         await query(
-          "INSERT INTO equipos_simcard (numero_celular, icc, imei) VALUES (?, ?, ?)",
-          [numero_celular, icc, imei]
+          "INSERT INTO equipos_simcard (numero_celular, icc, imei, tipo, es_reemplazo, qr_esim) VALUES (?, ?, ?, ?, ?, ?)",
+          [numero_celular, icc, imei, tipoLinea, esReemplazo, qrPath]
         );
       } else {
         return res.redirect("/home");
@@ -847,19 +884,28 @@ router.get(
         })(),
         // Si no tenemos estado en BD (por ejemplo, solo hay celular), asumimos "nuevo" para no dejar vacío.
         estado_equipo: estadoNormalizado || "nuevo",
+        // Datos específicos de SIM (si existe): MSISDN, ICC, IMSI y si es reemplazo.
         numero_celular: simcards[0]?.numero_celular || "",
         icc: simcards[0]?.icc || "",
+        msisdn: simcards[0]?.numero_celular || "",
+        imsi: simcards[0]?.imei || "",
+        reemplazo_sim: "No",
         // IMEI: prioridad al celular asignado; si no, SIM; si no, serie del celular como identificador.
         imei: primerCelular.imei || simcards[0]?.imei || primerCelular.serie || ""
       };
 
-      // Detectar plantilla según el equipo asignado (computadora → cómputo; celular/SIM → celulares).
+      // Detectar plantilla según el equipo asignado:
+      // - Computadora → formato de cómputo
+      // - Celular → formato de celulares
+      // - Solo SIM → formato eSIM
       let plantilla = req.query.plantilla;
       if (!plantilla) {
         if (computadoras.length) {
           plantilla = "FormatoComputo-.docx";
-        } else if (celulares.length || simcards.length) {
+        } else if (celulares.length) {
           plantilla = "FormatoCelular-.docx";
+        } else if (simcards.length) {
+          plantilla = "FormatoEsim- (1).docx";
         } else {
           plantilla = "FormatoComputo-.docx";
         }

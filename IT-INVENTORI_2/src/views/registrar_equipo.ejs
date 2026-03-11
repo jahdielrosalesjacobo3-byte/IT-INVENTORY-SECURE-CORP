@@ -22,7 +22,7 @@
               <h2 class="sc-page-title mb-2"><%= titulo %></h2>
               <p class="sc-page-subtitle mb-4">Alta en inventario. SECURE CORP.</p>
 
-              <form method="post" action="/registrar/<%= tipo %>">
+              <form method="post" action="/registrar/<%= tipo %>" enctype="multipart/form-data">
                 <% if (tipo === "computadora") { %>
                   <div class="mb-3"><label class="form-label">Marca</label><input type="text" name="marca" class="form-control sc-input <%= (fieldErrors && fieldErrors.marca) ? 'is-invalid' : '' %>" value="<%= (old && old.marca) ? old.marca : '' %>" required /><% if (fieldErrors && fieldErrors.marca) { %><div class="invalid-feedback"><%= fieldErrors.marca[0] %></div><% } %></div>
                   <div class="mb-3"><label class="form-label">Modelo</label><input type="text" name="modelo" class="form-control sc-input <%= (fieldErrors && fieldErrors.modelo) ? 'is-invalid' : '' %>" value="<%= (old && old.modelo) ? old.modelo : '' %>" required /><% if (fieldErrors && fieldErrors.modelo) { %><div class="invalid-feedback"><%= fieldErrors.modelo[0] %></div><% } %></div>
@@ -34,9 +34,39 @@
                   <div class="mb-3"><label class="form-label">Serie</label><input type="text" name="serie" class="form-control sc-input <%= (fieldErrors && fieldErrors.serie) ? 'is-invalid' : '' %>" value="<%= (old && old.serie) ? old.serie : '' %>" required /><% if (fieldErrors && fieldErrors.serie) { %><div class="invalid-feedback"><%= fieldErrors.serie[0] %></div><% } %></div>
                   <div class="mb-4"><label class="form-label">IMEI</label><input type="text" name="imei" class="form-control sc-input <%= (fieldErrors && fieldErrors.imei) ? 'is-invalid' : '' %>" value="<%= (old && old.imei) ? old.imei : '' %>" placeholder="Identificador del celular (opcional)" /><% if (fieldErrors && fieldErrors.imei) { %><div class="invalid-feedback"><%= fieldErrors.imei[0] %></div><% } %></div>
                 <% } else if (tipo === "sim") { %>
-                  <div class="mb-3"><label class="form-label">Número celular</label><input type="text" name="numero_celular" class="form-control sc-input <%= (fieldErrors && fieldErrors.numero_celular) ? 'is-invalid' : '' %>" value="<%= (old && old.numero_celular) ? old.numero_celular : '' %>" required /><% if (fieldErrors && fieldErrors.numero_celular) { %><div class="invalid-feedback"><%= fieldErrors.numero_celular[0] %></div><% } %></div>
+                  <div class="mb-3">
+                    <label class="form-label">Tipo de línea</label>
+                    <select name="tipo_sim" id="tipo_sim" class="form-select sc-input <%= (fieldErrors && fieldErrors.tipo_sim) ? 'is-invalid' : '' %>">
+                      <option value="SIM" <%= (!old || old.tipo_sim === 'SIM') ? 'selected' : '' %>>SIM física</option>
+                      <option value="ESIM" <%= (old && old.tipo_sim === 'ESIM') ? 'selected' : '' %>>eSIM</option>
+                    </select>
+                    <% if (fieldErrors && fieldErrors.tipo_sim) { %>
+                      <div class="invalid-feedback"><%= fieldErrors.tipo_sim[0] %></div>
+                    <% } %>
+                  </div>
+
+                  <div class="mb-3"><label class="form-label">Número celular (MSISDN)</label><input type="text" name="numero_celular" class="form-control sc-input <%= (fieldErrors && fieldErrors.numero_celular) ? 'is-invalid' : '' %>" value="<%= (old && old.numero_celular) ? old.numero_celular : '' %>" required /><% if (fieldErrors && fieldErrors.numero_celular) { %><div class="invalid-feedback"><%= fieldErrors.numero_celular[0] %></div><% } %></div>
                   <div class="mb-3"><label class="form-label">ICC</label><input type="text" name="icc" class="form-control sc-input <%= (fieldErrors && fieldErrors.icc) ? 'is-invalid' : '' %>" value="<%= (old && old.icc) ? old.icc : '' %>" required /><% if (fieldErrors && fieldErrors.icc) { %><div class="invalid-feedback"><%= fieldErrors.icc[0] %></div><% } %></div>
-                  <div class="mb-4"><label class="form-label">IMEI</label><input type="text" name="imei" class="form-control sc-input <%= (fieldErrors && fieldErrors.imei) ? 'is-invalid' : '' %>" value="<%= (old && old.imei) ? old.imei : '' %>" required /><% if (fieldErrors && fieldErrors.imei) { %><div class="invalid-feedback"><%= fieldErrors.imei[0] %></div><% } %></div>
+                  <div class="mb-3"><label class="form-label">IMSI / Identificador</label><input type="text" name="imei" class="form-control sc-input <%= (fieldErrors && fieldErrors.imei) ? 'is-invalid' : '' %>" value="<%= (old && old.imei) ? old.imei : '' %>" required /><% if (fieldErrors && fieldErrors.imei) { %><div class="invalid-feedback"><%= fieldErrors.imei[0] %></div><% } %></div>
+
+                  <div class="mb-3" id="grupo_reemplazo_sim">
+                    <label class="form-label">¿Es reemplazo de SIM?</label>
+                    <select name="reemplazo_sim" class="form-select sc-input <%= (fieldErrors && fieldErrors.reemplazo_sim) ? 'is-invalid' : '' %>">
+                      <option value="no" <%= (!old || old.reemplazo_sim === 'no') ? 'selected' : '' %>>No</option>
+                      <option value="si" <%= (old && old.reemplazo_sim === 'si') ? 'selected' : '' %>>Sí</option>
+                    </select>
+                    <% if (fieldErrors && fieldErrors.reemplazo_sim) { %>
+                      <div class="invalid-feedback"><%= fieldErrors.reemplazo_sim[0] %></div>
+                    <% } %>
+                  </div>
+
+                  <div class="mb-4 d-none" id="grupo_qr_esim">
+                    <label class="form-label">QR de eSIM (imagen)</label>
+                    <input type="file" name="qr_esim" accept="image/*" class="form-control sc-input <%= (fieldErrors && fieldErrors.qr_esim) ? 'is-invalid' : '' %>" />
+                    <% if (fieldErrors && fieldErrors.qr_esim) { %>
+                      <div class="invalid-feedback"><%= fieldErrors.qr_esim[0] %></div>
+                    <% } %>
+                  </div>
                 <% } %>
 
                 <div class="d-grid gap-2">
@@ -52,5 +82,26 @@
 
     <footer class="sc-footer-brand"><strong>SECURE <span>CORP</span></strong> — Inventario IT</footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <% if (tipo === "sim") { %>
+    <script>
+      (function() {
+        const selectTipo = document.getElementById("tipo_sim");
+        const grupoReemplazo = document.getElementById("grupo_reemplazo_sim");
+        const grupoQrEsim = document.getElementById("grupo_qr_esim");
+
+        function actualizarVisibilidad() {
+          if (!selectTipo) return;
+          const esEsim = selectTipo.value === "ESIM";
+          if (grupoReemplazo) grupoReemplazo.classList.toggle("d-none", esEsim);
+          if (grupoQrEsim) grupoQrEsim.classList.toggle("d-none", !esEsim);
+        }
+
+        if (selectTipo) {
+          selectTipo.addEventListener("change", actualizarVisibilidad);
+          actualizarVisibilidad();
+        }
+      })();
+    </script>
+    <% } %>
   </body>
 </html>

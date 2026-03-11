@@ -69,11 +69,31 @@ if (DB_TYPE === "sqlite") {
         numero_celular VARCHAR(15) NOT NULL,
         icc VARCHAR(25) NOT NULL UNIQUE,
         imei VARCHAR(20) NOT NULL UNIQUE,
+        tipo VARCHAR(10) NOT NULL DEFAULT 'SIM',
+        es_reemplazo SMALLINT NOT NULL DEFAULT 0,
+        qr_esim VARCHAR(255) NULL,
         fecha_asignacion DATETIME NULL,
         asignado_a_id INTEGER NULL REFERENCES equipos_empleado(id)
       )`
     ];
     for (const s of schemas) sqliteDb.run(s);
+
+    // Intentar añadir columnas nuevas a tablas existentes (si ya se creó antes) sin fallar si ya existen.
+    try {
+      sqliteDb.run("ALTER TABLE equipos_simcard ADD COLUMN tipo VARCHAR(10) NOT NULL DEFAULT 'SIM'");
+    } catch (e) {
+      // columna ya existe
+    }
+    try {
+      sqliteDb.run("ALTER TABLE equipos_simcard ADD COLUMN es_reemplazo SMALLINT NOT NULL DEFAULT 0");
+    } catch (e) {
+      // columna ya existe
+    }
+    try {
+      sqliteDb.run("ALTER TABLE equipos_simcard ADD COLUMN qr_esim VARCHAR(255) NULL");
+    } catch (e) {
+      // columna ya existe
+    }
     if (dbPath && fs.existsSync(path.dirname(dbPath))) {
       fs.writeFileSync(dbPath, Buffer.from(sqliteDb.export()));
     }

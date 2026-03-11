@@ -149,6 +149,12 @@ const celularRules = [
 
 // Registrar SIM
 const simRules = [
+  body("tipo_sim")
+    .trim()
+    .notEmpty()
+    .withMessage("Debes seleccionar el tipo de línea.")
+    .isIn(["SIM", "ESIM"])
+    .withMessage("Tipo de línea inválido."),
   body("numero_celular")
     .trim()
     .notEmpty()
@@ -166,7 +172,17 @@ const simRules = [
     .notEmpty()
     .withMessage("El IMEI es obligatorio.")
     .isLength({ max: 20 })
-    .withMessage("El IMEI no puede exceder 20 caracteres.")
+    .withMessage("El IMEI no puede exceder 20 caracteres."),
+  body("reemplazo_sim")
+    .optional()
+    .trim()
+    .isIn(["si", "no"])
+    .withMessage("Valor inválido para reemplazo de SIM."),
+  body("qr_esim")
+    .optional()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage("El campo de QR no puede exceder 255 caracteres.")
 ];
 
 // Registrar admin
